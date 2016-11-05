@@ -60,7 +60,6 @@
             this.menuStrip1.Size = new System.Drawing.Size(1228, 25);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
-            
             // 
             // cancelarVentaToolStripMenuItem
             // 

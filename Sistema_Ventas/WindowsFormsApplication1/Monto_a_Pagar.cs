@@ -24,9 +24,24 @@ namespace WindowsFormsApplication1
 
         }
 
-        private void txt_Listo_Click(object sender, EventArgs e)
+        
+
+        private void txt_Monto_KeyPress(object sender, KeyPressEventArgs e)
         {
-            MessageBox.Show((Convert.ToInt32(txt_Monto.Text) - Convert.ToInt32(txt_total.Text)).ToString());
+            if (e.KeyChar == (char)13) {
+
+                if((Convert.ToInt32(txt_Monto.Text) < Convert.ToInt32(txt_total.Text))){
+                    
+                    MessageBox.Show("El Monto a pagar debe ser mayor que el total vendido","EEROR",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                
+                }else{
+                
+                lbl_Vuelto.Text = ((Convert.ToInt32(txt_Monto.Text) - Convert.ToInt32(txt_total.Text)).ToString());
+
+                }
+                
+            
+            }
         }
 
         private void Monto_a_Pagar_Load(object sender, EventArgs e)

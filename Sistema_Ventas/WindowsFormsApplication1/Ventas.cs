@@ -21,7 +21,7 @@ namespace WindowsFormsApplication1
         private void Ventas_Load(object sender, EventArgs e)
         {
             dataGridView1.AllowUserToAddRows = false;  // para que no salga una fila en blanco en el principio del data gridview
-            dataGridView1.Font = new Font("Showcard Gothic",20); // cambiamos el tamaño el font de la letra
+            dataGridView1.Font = new Font("Showcard Gothic",15); // cambiamos el tamaño el font de la letra
             txt_cod_barra.Focus();
            
         }
@@ -39,78 +39,119 @@ namespace WindowsFormsApplication1
                 if (txt_cod_barra.Text == "")
                 {
 
-                    Monto_a_Pagar mp = new Monto_a_Pagar(); 
-                    mp.AsignarMonto(txt_total.Text);
-                    mp.Show();
+                    #region Validacion de venta sin productos
+                    if (txt_total.Text == "0")
+                    {
+                        MessageBox.Show("No hay productos que vender ingrese productos antes de vender","ERROR " , MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else {
+                        Monto_a_Pagar mp = new Monto_a_Pagar();
+                        mp.AsignarMonto(txt_total.Text);
+                        mp.Show();
+                    }
+                    #endregion Validacion de venta sin productos
                 }
                 else
                 {
                     // variable de control para el codigo de barra
                     string code = txt_cod_barra.Text;
 
-                    // agregamos el producto al GridView
-                    #region AgregarProductoAlGridView
-                    string[] producto;
-
-                    // cargamos el producto desde la base de datos en un arreglo
-                    producto = new Business_Logic.BL.BL_CRUD().BuscarProducto(code);
-
-                    //validamos que el arreglo tenga un producto
-                    if (producto.Length > 0)
+                    if (code.Length < 5)
                     {
-                        #region Aumentar cantidad de items
-                        //validamos que el textbox cantidad de item este en 0, para saber que es el primer producto a comprar
-                        if (txt_cantidad_items.Text == "0")
+
+                        IngresarProductoSinCodigo(code);
+
+                    }
+                    else {
+
+
+                        // agregamos el producto al GridView
+                        #region AgregarProductoAlGridView
+                        string[] producto;
+
+                        // cargamos el producto desde la base de datos en un arreglo
+                        producto = new Business_Logic.BL.BL_CRUD().BuscarProducto(code);
+
+                        //validamos que el arreglo tenga un producto
+                        if (producto.Length > 0)
                         {
-                            txt_cantidad_items.Text = "1";
-                        }
-                        else {
+                            #region Aumentar cantidad de items
+                            //validamos que el textbox cantidad de item este en 0, para saber que es el primer producto a comprar
+                            if (txt_cantidad_items.Text == "0")
+                            {
+                                txt_cantidad_items.Text = "1";
+                            }
+                            else
+                            {
 
-                            txt_cantidad_items.Text = (Convert.ToInt32(txt_cantidad_items.Text) + 1).ToString();
-                        }
-                        #endregion Aumentar cantidad de items
+                                txt_cantidad_items.Text = (Convert.ToInt32(txt_cantidad_items.Text) + 1).ToString();
+                            }
+                            #endregion Aumentar cantidad de items
 
-                        DataGridView dt = new DataGridView();
-                        // el 0 indica que agrega en el primer campo del gridview y entonces los demas se van bajando
-                        if(Find_Product_in_Grid(code)){
+                            DataGridView dt = new DataGridView();
+                            // el 0 indica que agrega en el primer campo del gridview y entonces los demas se van bajando
+                            if (Find_Product_in_Grid(code))
+                            {
 
-                            //MessageBox.Show("Si esta el producto en el GridView");
+                                //MessageBox.Show("Si esta el producto en el GridView");
 
-                            //Buscamos el codigo nuevamente
-                            foreach(DataGridViewRow fila in dataGridView1.Rows){
+                                //Buscamos el codigo nuevamente
+                                foreach (DataGridViewRow fila in dataGridView1.Rows)
+                                {
 
-                                if (fila.Cells[0].Value.Equals(code)) {
+                                    if (fila.Cells[0].Value.Equals(code))
+                                    {
 
-                                    //Modificamos en el GridView 
-                                    fila.Cells[3].Value = ((Convert.ToInt32(fila.Cells[3].Value) + 1).ToString());                                
+                                        //Modificamos en el GridView 
+                                        fila.Cells[3].Value = ((Convert.ToInt32(fila.Cells[3].Value) + 1).ToString());
+                                    }
+
                                 }
-                            
+
+
+
+                            }
+                            else
+                            {
+                                dataGridView1.Rows.Insert(0, producto[0], producto[1], producto[2], "1");
                             }
 
+                            Sumar(); // sumamos todas las casillas del GridView
+                            txt_cod_barra.Clear();
+                            txt_cod_barra.Focus();
 
 
-                        }else{
-                        dataGridView1.Rows.Insert(0, producto[0], producto[1], producto[2],"1");
+
+
                         }
-                        
-                        Sumar(); // sumamos todas las casillas del GridView
-                        txt_cod_barra.Clear();
-                        txt_cod_barra.Focus();
+                        else
+                        {
 
-
-
-
+                            MessageBox.Show("El producto no esta disponible para la venta", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        #endregion AgregarProductoAlGridView
                     }
-                    else
-                    {
+                    
+                    
 
-                        MessageBox.Show("El producto no esta disponible para la venta", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-                    }
-                    #endregion AgregarProductoAlGridView
                 }
             }
            
         }
+
+        #region IngresarProductoSinCodigo
+                public void IngresarProductoSinCodigo(string precio) { 
+        
+        
+                     dataGridView1.Rows.Insert(0, "*******", "Producto sin Codigo", precio,"1");
+                        
+                        Sumar(); // sumamos todas las casillas del GridView
+                        txt_cod_barra.Clear();
+                        txt_cod_barra.Focus();
+        
+                }
+       #endregion IngresarProductosSinCodigo
+
 
         #region Find_Product_in_DataGridView
 
@@ -159,6 +200,8 @@ namespace WindowsFormsApplication1
             this.Hide();
         }
         #endregion CancelarCompra
+
+        
 
        
 
